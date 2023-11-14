@@ -36,6 +36,17 @@ double gausX2(double* xPtr, double par[]) {
   return f;
 }
 
+double gumbel(double* xPtr, double par[]) {
+  double x = *xPtr;
+  double B = par[0];
+  double mu = par[1];
+  double A = par[2];
+  double z = (x-mu)/B;
+  double exponent = -(z + TMath::Exp(-z));
+  double f = A*(1/B)*TMath::Exp(exponent);
+  return f;
+}
+
 double calcCHI(TH1F* h, TF1* f){
   double chi=0;
   for (int i=1; i<=h->GetNbinsX(); i++){
@@ -87,17 +98,27 @@ int main(int argc, char **argv) {
   double xmax = 200;
 
   const int npar = 6;
+  const int npar2 = 3;
 
   TMinuit minuit(npar);
+  TMinuit minuit2(npar);
+
   minuit.SetFCN(fcn);
+  minuit2.SetFCN(fcn);
 
   TF1* myfunc = new TF1("myfunc", gausX2, xmin, xmax, npar);
+  TF1* mygumbelfunc = new TF1("mygumbelfunc", gumbel, xmin, xmax, npar);
 
   double par[npar];
+  double par2[npar2];
   double stepSize[npar];
+  double stepSize2[npar2];
   double minVal[npar];
+  double minVal2[npar2];
   double maxVal[npar];
+  double maxVal2[npar2];
   TString parName[npar];
+  TString parName2[npar2];
 
   double hmax = h->GetMaximum();
   double hmu = h->GetMean();
@@ -110,7 +131,13 @@ int main(int argc, char **argv) {
   par[4] = hmu+10;
   par[5] = hstd;
 
+  par2[0] = 40;
+  par2[1] = 50;
+  par2[2] = 1000;
+
   myfunc->SetParameters(par[0], par[1], par[2], par[3], par[4], par[5]);
+
+  mygumbelfunc->SetParameters(par[0], par[1], par[2]);
   
   
   
@@ -120,6 +147,12 @@ int main(int argc, char **argv) {
     maxVal[i] = par[i]*2;
   }
 
+  for (int i=0; i < npar2; i++) {
+    stepSize2[i] = TMath::Abs(par2[i]*0.01);
+    minVal2[i] = 0;
+    maxVal2[i] = 0;
+  }
+
   parName[0] = "A1";
   parName[1] = "mean1";
   parName[2] = "standard deviation 1";
@@ -127,20 +160,36 @@ int main(int argc, char **argv) {
   parName[4] = "mean2";
   parName[5] = "standard deviation 2";
 
+  parName2[0] = "Beta";
+  parName2[1] = "mu";
+  parName2[2] = "A";
+
   for (int i=0; i<npar; i++) {
     minuit.DefineParameter(i, parName[i].Data(), par[i], stepSize[i], minVal[i], maxVal[i]);
   }
+
+  cout << "Fail 1" << endl;
+
+  for (int i=0; i<npar2; i++) {
+    minuit2.DefineParameter(i, parName2[i].Data(), par2[i], stepSize2[i], minVal2[i], maxVal2[i]);
+  }
+
+  cout << "Fail 2" << endl;
 
   hdata = h;
   fparam = myfunc;
 
   minuit.Migrad();
 
+  cout << "Fail 3" << endl;
+
   double outpar[npar];
   double err[npar];
   for (int i=0; i<npar; i++) {
     minuit.GetParameter(i, outpar[i], err[i]);
   }
+
+  cout << "Fail 4" << endl;
 
   gMinuit->mnmnos();
 
@@ -153,10 +202,68 @@ int main(int argc, char **argv) {
   myfunc->GetXaxis()->SetTitle("x");
   myfunc->GetYaxis()->SetTitle("f");
 
+  
+  fparam = mygumbelfunc;
 
+  minuit2.Migrad();
+
+  double outpar2[npar2];
+  double err2[npar2];
+  for (int i=0; i<npar2; i++) {
+    minuit2.GetParameter(i, outpar2[i], err2[i]);
+  }
+
+  gMinuit->mnmnos();
+
+  mygumbelfunc->SetParameters(outpar2);
+
+  mygumbelfunc->SetLineStyle(1);
+  mygumbelfunc->SetLineColor(1);
+  mygumbelfunc->SetLineWidth(2);
+
+  mygumbelfunc->GetXaxis()->SetTitle("x");
+  mygumbelfunc->GetYaxis()->SetTitle("f");
+
+  
+
+  canvas->Divide(2,1);
+
+  canvas->cd(1);
   h->Draw();
   myfunc->Draw("same");
+
+  canvas->cd(2);
+  h->Draw();
+  mygumbelfunc->Draw("same");
+  
   canvas->SaveAs("pt1.png");
+
+  double chi = 0.0;
+  double chi2 = 0.0;
+  double measured = 0.0;
+  double expected = 0.0;
+  double expected2 = 0.0;
+  double error = 0.0;
+  double binCenter = 0.0;
+  for (int i = 0; i < h->GetNbinsX(); i++) {
+    measured = h->GetBinContent(i);
+    error = h->GetBinError(i);
+    binCenter = h->GetBinCenter(i);
+    expected = myfunc->Eval(binCenter);
+    expected2 = mygumbelfunc->Eval(binCenter);
+    if (error>=1e-10) {
+      chi += (measured-expected) * (measured-expected) / (error*error);
+      chi2 += (measured-expected2) * (measured-expected2) / (error*error);
+    }
+  }
+
+  cout << "Sum of Two Gaussians:" << endl;
+  cout << "chi-squared: " << chi << endl;
+  cout << "p value = " << TMath::Prob(chi, h->GetNbinsX()-npar) << endl << endl;
+
+  cout << "Gumbel Distribution:" << endl;
+  cout << "chi-squared: " << chi2 << endl;
+  cout << "p value = " << TMath::Prob(chi2, h->GetNbinsX()-npar2) << endl;
 
   cout << "press ENTER to close" << endl;
   cin.get();

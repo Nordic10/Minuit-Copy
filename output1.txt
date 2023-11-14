@@ -1,0 +1,13 @@
+ EXT PARAMETER                  PARABOLIC         MINOS ERRORS        
+  NO.   NAME      VALUE            ERROR      NEGATIVE      POSITIVE   
+   1  Beta         6.59041e+00   5.13376e-02  -5.15205e-02   5.12548e-02
+   2  mu           7.77569e+01   6.96353e-02  -6.94755e-02   6.98201e-02
+   3  A            1.99649e+04   1.99518e+02                            
+Info in <TCanvas::Print>: file pt1.png has been created
+Sum of Two Gaussians:
+chi-squared: 258.047
+p value = 3.19697e-17
+
+Gumbel Distribution:
+chi-squared: 21.5077
+p value = 1

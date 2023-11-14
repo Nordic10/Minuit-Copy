@@ -1,0 +1,11 @@
+EXT PARAMETER                  PARABOLIC         MINOS ERRORS        
+  NO.   NAME      VALUE            ERROR      NEGATIVE      POSITIVE   
+   1  A            2.93916e+02   3.17167e+01  -3.01207e+01   3.15094e+01
+   2  mean         7.46144e+01   4.54257e-01  -4.54140e-01   4.49344e-01
+   3  standard deviation   4.62628e+00   4.42353e-01  -4.19609e-01   4.60230e-01
+   4  lambda       1.98047e+01   6.43084e-01  -6.31343e-01   6.42193e-01
+   5  func1 multiplier   8.13241e+02   6.18990e+01  -5.85574e+01   6.45274e+01
+   6  n           -2.15000e+00   1.30520e-01                 6.00375e-03
+   7  func2 multiplier   4.07465e+05   2.22527e+05                            
+chi-squared: 73.9763
+p value = 0.926952
