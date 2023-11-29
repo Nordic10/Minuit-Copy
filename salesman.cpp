@@ -201,27 +201,48 @@ void sweep(std::vector<COORD>& route, double beta, double& masterDistance){
   do {
     
     rand2 = rand() % route.size();
-  } while (rand1 == rand2);
+  } while (rand1 == rand2 && (route.size() - rand1 + rand2) == 0);
   
   
   int rand3;
   vector<COORD> newRoute = reverseSection(route, rand1, rand2, rand3);
   double newDistance = masterDistance;
 
+  double newDistanceSubtract = 0;
+  double newDistanceAdd = 0;
+  if (rand1 = 0 != true){
 
-  if (rand1 = 0 == true){
+    newDistanceSubtract += calculateDistance(route[rand1], route[rand1 - 1]);
+  } else {
 
-    
+    newDistanceSubtract += calculateDistance(route[0], route[route.size()]);
   }
 
-  if (rand1 - 1 >= 0 && rand2 - 1 >= 0){
+  //
+  if (rand2 = 0 != true){
+
+    newDistanceSubtract += calculateDistance(route[rand2], route[rand2 - 1]);
+  } else {
+
+    newDistanceSubtract += calculateDistance(route[0], route[route.size()]);
+  }
+
+  //
+  int groupSize = abs(rand1 - rand2);
+  rand3 + groupSize > route.size() ? groupSize = route.size() - groupSize: ;
+  if (rand3 = 0 != true){
+
+    newDistanceAdd += calculateDistance(route[rand3], route[rand3 - 1]);
+    newDistanceAdd += calculateDistance(route[rand3 + groupSize], route[rand3 + groupSize - 1]);
+
+    rand1 < rand2 ? newDistanceAdd += calculateDistance(route[rand1 + groupSize], route[rand1 + groupSize - 1) : calculateDistance(route[rand2 + groupSize], route[rand2 + groupSize - 1) ;
+  } else {
+
+    newDistanceAdd += calculateDistance(route[0], route[route.size()]);
+    newDistanceAdd += calculateDistance(route[groupSize], route[groupSize - 1]);
+  }
+
   
-    int groupSize = abs(rand1 - rand2);
-    groupSize + rand3 < route.size() ? : groupSize = route.size() - groupSize ;
-
-    double newDistanceSubtract = calculateDistance(route[rand1], route[rand1 - 1]) + calculateDistance(route[rand2], route[rand2 - 1]);
-    dobule newDistanceAdd = calculateDistance(newRoute[rand3], newRoute[rand3 - 1]) + calculateDistance(newRoute[rand3 + groupSize - 1], );
-  }
   
   
   
